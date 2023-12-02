@@ -54,50 +54,39 @@ namespace AocDay01 {
     }
 
     int8_t getCalibrationValue(const std::string& line, const bool useWords) {
-        unordered_map<string, int8_t> decode {
-            {"0",0},
-            {"1",1},
-            {"2",2},
-            {"3",3},
-            {"4",4},
-            {"5",5},
-            {"6",6},
-            {"7",7},
-            {"8",8},
-            {"9",9}
+        vector<string> decode {
+            "0","zero",
+            "1","one",
+            "2","two",
+            "3","three",
+            "4","four",
+            "5","five",
+            "6","six",
+            "7","seven",
+            "8","eight",
+            "9","nine"
         };
-        if(useWords) {
-            decode["zero"] = 0;
-            decode["one"] = 1;
-            decode["two"] = 2;
-            decode["three"] = 3;
-            decode["four"] = 4;
-            decode["five"] = 5;
-            decode["six"] = 6;
-            decode["seven"] = 7;
-            decode["eight"] = 8;
-            decode["nine"] = 9;
-        }
         
         size_t minPos = line.size();
         size_t maxPos = 0;
+        int8_t lsd, msd;
         string minS{}, maxS{};
-        for(const auto kvp : decode) {
-            auto s = kvp.first;
+        for(size_t i = 0; i < decode.size(); i = i + (useWords ? 1 : 2)) {
+            auto s = decode[i];
             auto pos = line.find(s);
             while(pos != string::npos) {
                 if(pos >= maxPos) {
                     maxPos = pos;
-                    maxS = s;
+                    lsd = static_cast<int8_t>(i >> 1);
                 }
                 if(pos <= minPos) {
                     minPos = pos;
-                    minS = s;
+                    msd = static_cast<int8_t>(i >> 1)*10;
                 }
                 pos = line.find(s, pos + 1);
             }
         }
         
-        return (decode[minS] * 10) + decode[maxS];
+        return msd+lsd;
     }
 }
