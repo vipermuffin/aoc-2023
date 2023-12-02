@@ -12,5 +12,5 @@
 
 namespace AocDay01 {
 //Function Definitions
-
+int8_t getCalibrationValue(const std::string& line, const bool useWords = false);
 }
