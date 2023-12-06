@@ -12,17 +12,30 @@
 //Common Libraries
 #include <algorithm> //std::sort, find, for_each, max_element, etc
 #include <climits>   //INT_MIN, INT_MAX, etc.
-
+#include <sstream>
 
 
 using namespace std;
 namespace AocDay05 {
 
+    //parseLineForLongNum was not working on GHA Linux node.  Temporary fix until incorporated into tools.
+    template <class T>
+    std::vector<T> parseLineForNumbersOfTypeT(const std::string& line)
+    {
+       vector<T> words{};
+       stringstream ss{line};
+       T word;
+       while(ss >> word) {
+          words.push_back(word);
+       }
+       return words;
+    }
+
     static const std::string InputFileName = "Day05.txt";
     std::string solvea() {
         auto input = parseFileForLines(InputFileName);
         auto database = parseConnections(input);
-        auto seedIds = parseLineForLongNumbers(input[0]);
+        vector<int64_t> seedIds = parseLineForNumbersOfTypeT<int64_t>(string(input[0].begin()+6,input[0].end()));
         
         std::vector<SeedPlaybook> seeds{};
         seeds.reserve(seedIds.size());
@@ -44,9 +57,8 @@ namespace AocDay05 {
         //Min for part one without ranges 386490336
         auto input = parseFileForLines(InputFileName);
         auto database = parseConnections(input);
-        auto seedIds = parseLineForLongNumbers(input[0]);
-        vector<int64_t> seedRanges{seedIds.begin(),seedIds.end()};
-        auto closestLoc = findClosestSeed(database, seedRanges);
+        vector<int64_t> seedIds = parseLineForNumbersOfTypeT<int64_t>(string(input[0].begin()+6,input[0].end()));
+        auto closestLoc = findClosestSeed(database, seedIds);
 		return to_string(closestLoc);
     }
 
