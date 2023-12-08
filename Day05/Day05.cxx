@@ -63,7 +63,7 @@ namespace AocDay05 {
     }
 
     OffsetPoint::OffsetPoint(const std::string& config) {
-        auto vals = parseLineForLongNumbers(config);
+        auto vals = parseLineForNumbersOfTypeT<int64_t>(config);
         destStart = vals[0];
         sourceStart = vals[1];
         range = vals[2];
@@ -100,7 +100,7 @@ namespace AocDay05 {
         while(itr != input.end()) {
             auto mappingType = *itr;
             std::advance(itr, 1);
-            while(itr->size() > 0) {
+            while(itr != input.end() && itr->size() > 0) {
                 struct OffsetPoint op{*itr};
                 connectionTable[mappingType].push_back(op);
                 std::advance(itr, 1);
