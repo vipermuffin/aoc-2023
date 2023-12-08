@@ -9,6 +9,7 @@
 
 #include "Day07.h"
 #include "gtest/gtest.h"
+#include <algorithm> //std::sort, find, for_each, max_element, etc
 #include <iostream>
 #include <string>
 
