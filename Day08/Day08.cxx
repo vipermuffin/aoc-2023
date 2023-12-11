@@ -38,15 +38,15 @@ namespace AocDay08 {
     std::string solvea() {
         auto input = parseFileForLines(InputFileName);
         auto t = GenerateTree(input);
-        string target = "ZZZ";
 
-		return to_string(FindStepsToTarget(t, input[0], target));
+		return to_string(FindStepsToTarget(t, input[0]));
     }
 
     std::string solveb() {
         auto input = parseFileForLines(InputFileName);
+        auto t = GenerateTree(input);
 
-		return "---";
+        return to_string(FindStepsToTarget(t, input[0], true));
     }
 
     Tree GenerateTree(const std::vector<std::string>& input) {
@@ -61,30 +61,54 @@ namespace AocDay08 {
         return t;
     }
 
-    int32_t FindStepsToTarget(const Tree& tree, const std::string& directions, const std::string& target) {
+    int32_t FindStepsToTarget(const Tree& tree, const std::string& directions, bool ghostPath) {
         auto itr = directions.begin();
         bool found = false;
         int32_t steps = 0;
-        string current{"AAA"};
-        while(!found) {
-            if(tree.count(current) > 0) {
-                string next;
-                if(*itr == 'L') {
-                     next = tree.at(current).first;
-                } else {
-                    next = tree.at(current).second;
-                }
-                std::advance(itr, 1);
-                if(itr == directions.end()) {
-                    itr = directions.begin();
-                }
-                steps++;
-                if(next == target) {
-                    found = true;
-                } else {
-                    std::swap(current,next);
+        vector<string> current{};
+        if(ghostPath) {
+            for(const auto& n : tree) {
+                if(n.first.back() == 'A') {
+                    current.push_back(n.first);
                 }
             }
+        } else {
+            current.push_back("AAA");
+        }
+        string target{"ZZZ"};
+        while(!found) {
+            vector<string> next;
+            for(auto i = 0; i < current.size();i++) {
+                if(tree.count(current[i]) > 0) {
+                    if(*itr == 'L') {
+                         next.push_back(tree.at(current[i]).first);
+                    } else {
+                        next.push_back(tree.at(current[i]).second);
+                    }
+                }
+            }
+            std::advance(itr, 1);
+            if(itr == directions.end()) {
+                itr = directions.begin();
+            }
+            steps++;
+            if(steps == INT32_MAX) {
+                cerr << "Overflow detected" << endl;
+            }
+            if(ghostPath) {
+                size_t count{0};
+                for(auto i = 0; i < next.size();i++) {
+                    if(next[i].back() == 'Z') {
+                        count++;
+                    }
+                }
+                found = count == next.size();
+            } else {
+                if(next.front() == target) {
+                    found = true;
+                }
+            }
+            std::swap(current,next);
         }
         
         return steps;
