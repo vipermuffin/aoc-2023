@@ -13,26 +13,35 @@
 #include <algorithm> //std::sort, find, for_each, max_element, etc
 //#include <array>
 #include <climits>   //INT_MIN, INT_MAX, etc.
-//#include <chrono>
-//#include <iostream>
-//#include <fstream> //ifstream
-//#include <functional> //std::function
-//#include <iomanip> //setfill setw hex
-//#include <map>
-//#include <math.h> //sqrt
-//#include <numeric> //std::accumulate
-//#include <queue>
-//#include <regex>
-//#include <set>
-//#include <sstream>
-//#include <thread>
-//#include <tuple>
-//#include <unordered_map>
-//#include <unordered_set>
+
 
 
 using namespace std;
 namespace AocDay08 {
+template<typename T>
+T gcf(T a, T b) {
+    if (a == 0 || b == 0) {
+        return 0;
+    }
+    if(a == b) {
+        return a;
+    }
+    auto newA = a > b ? a : b;
+    auto newB = a > b ? b : a;
+    
+    auto c = newA;
+    while(c > newB) {
+        c -= newB;
+    }
+    
+    return gcf<T>(c,newB);
+}
+
+template<typename T>
+T lcm(T a, T b) {
+    auto gcd = gcf<T>(a,b);
+    return gcd>0 ? (a*b)/gcd : 0;
+}
 
     static const std::string InputFileName = "Day08.txt";
     std::string solvea() {
@@ -45,7 +54,7 @@ namespace AocDay08 {
     std::string solveb() {
         auto input = parseFileForLines(InputFileName);
         auto t = GenerateTree(input);
-
+        //return "---";
         return to_string(FindStepsToTarget(t, input[0], true));
     }
 
@@ -61,10 +70,10 @@ namespace AocDay08 {
         return t;
     }
 
-    int32_t FindStepsToTarget(const Tree& tree, const std::string& directions, bool ghostPath) {
+    int64_t FindStepsToTarget(const Tree& tree, const std::string& directions, bool ghostPath) {
         auto itr = directions.begin();
         bool found = false;
-        int32_t steps = 0;
+        int64_t steps = 0;
         vector<string> current{};
         if(ghostPath) {
             for(const auto& n : tree) {
@@ -75,6 +84,7 @@ namespace AocDay08 {
         } else {
             current.push_back("AAA");
         }
+        vector<int64_t> stepCount(current.size(),0);
         string target{"ZZZ"};
         while(!found) {
             vector<string> next;
@@ -92,25 +102,39 @@ namespace AocDay08 {
                 itr = directions.begin();
             }
             steps++;
-            if(steps == INT32_MAX) {
+            if(steps == INT64_MAX) {
                 cerr << "Overflow detected" << endl;
             }
             if(ghostPath) {
                 size_t count{0};
                 for(auto i = 0; i < next.size();i++) {
-                    if(next[i].back() == 'Z') {
+                    if(stepCount[i] == 0) {
+                        if(next[i].back() == 'Z') {
+                            stepCount[i] = steps;
+                        }
+                    } else {
                         count++;
                     }
                 }
                 found = count == next.size();
             } else {
                 if(next.front() == target) {
+                    stepCount.front() = steps;
                     found = true;
                 }
             }
             std::swap(current,next);
         }
         
-        return steps;
+        
+        auto cItr = stepCount.begin();
+        int64_t currentLcm{1};
+        while(cItr != stepCount.end()) {
+            int64_t nextLcm = lcm<int64_t>(currentLcm,*cItr);
+            currentLcm = nextLcm;
+            std::advance(cItr, 1);
+        }
+        
+        return currentLcm;
     }
 }
