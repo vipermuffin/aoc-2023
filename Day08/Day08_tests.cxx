@@ -25,7 +25,7 @@ TEST(Y2023_SolveDay8, FinalSolutionPartA) {
 }
 
 TEST(Y2023_SolveDay8, FinalSolutionPartB) {
-    EXPECT_EQ("---", solveb());
+    EXPECT_EQ("16342438708751", solveb());
 }
 
 TEST(Y2023_Day8Example,Test1) {

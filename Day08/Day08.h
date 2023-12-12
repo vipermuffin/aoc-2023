@@ -15,5 +15,5 @@ namespace AocDay08 {
 //Function Definitions
 using Tree = std::unordered_map<std::string,std::pair<std::string,std::string>>;
 Tree GenerateTree(const std::vector<std::string>&);
-int32_t FindStepsToTarget(const Tree& tree, const std::string& directions, bool ghostPath = false);
+int64_t FindStepsToTarget(const Tree& tree, const std::string& directions, bool ghostPath = false);
 }
