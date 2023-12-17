@@ -16,4 +16,5 @@ namespace AocDay13 {
 int32_t findHorizontalReflection(const std::vector<std::string>&);
 std::vector<std::string> transposeImage(const std::vector<std::string>&);
 int32_t calcReflections(const std::vector<std::string>&);
+int32_t calcNewReflections(const std::vector<std::string>&);
 }

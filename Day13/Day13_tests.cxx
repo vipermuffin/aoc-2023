@@ -78,3 +78,24 @@ TEST(Y2023_Day13Example,Test3) {
     };
     EXPECT_EQ(405,calcReflections(input));
 }
+
+TEST(Y2023_Day13Example,Test3b) {
+    vector<string> input {
+        "#.##..##.",
+        "..#.##.#.",
+        "##......#",
+        "##......#",
+        "..#.##.#.",
+        "..##..##.",
+        "#.#.##.#.",
+        "",
+        "#...##..#",
+        "#....#..#",
+        "..##..###",
+        "#####.##.",
+        "#####.##.",
+        "..##..###",
+        "#....#..#",
+    };
+    EXPECT_EQ(400,calcNewReflections(input));
+}
