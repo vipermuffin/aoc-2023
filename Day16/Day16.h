@@ -71,7 +71,8 @@ struct BEAM_S {
 
 using Beam = struct BEAM_S;
 
-int32_t determineActiveTiles(const std::vector<std::string>&);
+int32_t determineActiveTiles(const std::vector<std::string>&, uint32_t x = 0, uint32_t y = 0, const DIRECTION_E initDir = EAST);
 uint64_t stepBeam(const std::vector<std::string>& grid, Beam& b, std::vector<Beam>& beams, std::vector<std::vector<int>>&);
 void printMap(const std::vector<std::string>& grid, const std::vector<Beam>& beams, const std::vector<std::vector<int>>& visited);
+int32_t findMaxActiveTiles(const std::vector<std::string>&);
 }

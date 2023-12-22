@@ -21,11 +21,11 @@ using namespace std;
 using namespace AocDay16;
 
 TEST(Y2023_SolveDay16, FinalSolutionPartA) {
-//    EXPECT_EQ("---", solvea());
+    EXPECT_EQ("7860", solvea());
 }
 
 TEST(Y2023_SolveDay16, FinalSolutionPartB) {
-    EXPECT_EQ("---", solveb());
+    EXPECT_EQ("8331", solveb());
 }
 
 TEST(Y2023_Day16Example,Test1) {
@@ -44,12 +44,3 @@ TEST(Y2023_Day16Example,Test1) {
     EXPECT_EQ(46,determineActiveTiles(input));
 }
 
-TEST(Y2023_Day16Example,Test2) {
-    int x = 0;
-    EXPECT_EQ(0,x);
-}
-
-TEST(Y2023_Day16Example,Test3) {
-    int x = 0;
-    EXPECT_EQ(0,x);
-}
