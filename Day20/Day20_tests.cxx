@@ -59,6 +59,15 @@ TEST(Y2023_Day20Example,Test2) {
 }
 
 TEST(Y2023_Day20Example,Test3) {
-    int x = 0;
-    EXPECT_EQ(0,x);
+    vector<string> input {
+        "broadcaster -> a, b, c",
+        "%a -> b",
+        "%b -> c",
+        "%c -> inv",
+        "&inv -> a"
+    };
+    bitset<MOD_BITS> x{0};
+    auto modules = buildModuleConnections(input);
+    pressButton(x, modules);
+    ASSERT_EQ(5,modules.size());
 }

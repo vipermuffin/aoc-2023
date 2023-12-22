@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-
+#include <iostream>
 namespace AocDay20 {
 //Function Definitions
 constexpr size_t MOD_BITS = 64;
@@ -23,6 +23,7 @@ public:
     virtual std::vector<size_t> receivePulse(const size_t valPos, std::bitset<MOD_BITS>&){}
     void addConnection(const size_t pos) {
         _connectedPos.push_back(pos);
+        std::cout << "-New Connection to module position " << _pos << " of " << pos << std::endl;
     }
     bool getValPos() const {
         return _pos;
@@ -48,6 +49,7 @@ class Conjunction : public IModule {
 public:
     Conjunction(const size_t initPos) {
         _pos = initPos;
+        std::cout << "New Conjunction with position " << _pos << std::endl;
     }
     virtual ~Conjunction() {}
     virtual std::vector<size_t> receivePulse(const size_t valPos, std::bitset<MOD_BITS>&);
@@ -59,12 +61,14 @@ class Broadcaster : public IModule {
 public:
     Broadcaster(const size_t initPos = 0) {
         _pos = initPos;
+        std::cout << "New Broadcaster with position " << _pos << std::endl;
     }
     virtual ~Broadcaster() {}
     virtual std::vector<size_t> receivePulse(const size_t valPos, std::bitset<MOD_BITS>&) {
         return _connectedPos;
     }
 };
+using ModuleCollection = std::vector<std::unique_ptr<IModule>>;
 std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<std::string>& input);
-
+void pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules);
 }

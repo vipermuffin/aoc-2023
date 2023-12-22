@@ -49,13 +49,16 @@ namespace AocDay20 {
 
 FlipFlop::FlipFlop(const size_t initPos) {
     _pos = initPos;
+    cout << "New FlipFlop with position " << _pos << endl;
 }
 
 std::vector<size_t> FlipFlop::receivePulse(const size_t valPos, std::bitset<MOD_BITS> &bits) {
+    std::vector<size_t> retVec{};
     if(!bits[valPos]) {
         bits.flip(_pos);
+        retVec = _connectedPos;
     }
-    return _connectedPos;
+    return retVec;
 }
 
 std::vector<size_t> Conjunction::receivePulse(const size_t valPos, std::bitset<MOD_BITS> &bits) {
@@ -92,7 +95,7 @@ std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<s
             moduleMapping[name] = retVec.size();
             retVec.push_back(unique_ptr<Conjunction>(new Conjunction(moduleMapping[name])));
         } else {
-            //broadcaster
+            //broadcaster 
             name = words[0];
         }
         
@@ -105,7 +108,30 @@ std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<s
         }
     }
     
+    for(const auto& kvp : pendingConnections) {
+        for(const auto& output : kvp.second) {
+            retVec[moduleMapping.at(kvp.first)]->addConnection(moduleMapping.at(output));
+        }
+    }
+    
     return retVec;
 }
 
+void pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules) {
+    vector<std::pair<size_t,size_t>> updateMods{{0,0}};
+    auto initVal = bits.to_ullong();
+    bool firstPass = true;
+    do{
+        vector<std::pair<size_t,size_t>> nextMods{};
+        for(const auto pos : updateMods) {
+            firstPass = pos.first == 0;
+            auto result = modules[pos.second]->receivePulse(pos.first, bits);
+            for(const auto nextPos : result) {
+                nextMods.emplace_back(pos.second,nextPos);
+            }
+        }
+        std::swap(nextMods,updateMods);
+        cout << bits.to_string() << endl;
+    } while(firstPass || bits.to_ullong() != initVal);
+}
 }
