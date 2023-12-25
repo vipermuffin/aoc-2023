@@ -20,7 +20,7 @@
 //#include <iomanip> //setfill setw hex
 //#include <map>
 //#include <math.h> //sqrt
-//#include <numeric> //std::accumulate
+#include <numeric> //std::accumulate
 //#include <queue>
 //#include <regex>
 //#include <set>
@@ -47,8 +47,13 @@ namespace AocDay12 {
 
     std::string solveb() {
         auto input = parseFileForLines(InputFileName);
+        int64_t acc{0};
+        for(const auto& line : input) {
+            auto newLine = buildNewReport(line);
+            acc += determineConfigs(newLine);
+        }
 
-		return "---";
+        return to_string(acc);
     }
 
     bool verifyConfig(const std::string& lhs, const std::vector<int>& rhs) {
@@ -79,26 +84,52 @@ namespace AocDay12 {
         auto split = parseLineForWords(input);
         auto vals = parseCsvLineForNum(split[1]);
         vector<size_t> qs{};
+        vector<bool> bsp{};
         qs.reserve(split[0].size());
+        bsp.reserve(split[0].size());
+        auto totalSprings = std::accumulate(vals.begin(), vals.end(), 0);
+        auto knownSprings{0};
         for(auto i = 0; i < split[0].size();i++) {
             if(split[0][i] == '?') {
                 qs.push_back(i);
+                bsp.push_back(false);
+            }else if(split[0][i] == '#') {
+                knownSprings++;
             }
         }
+        auto bspItr = bsp.rbegin();
+        while(knownSprings < totalSprings) {
+            *bspItr = true;
+            knownSprings++;
+            std::advance(bspItr, 1);
+        }
         
-        size_t maxVal = (1 << qs.size());
-        size_t curVal = 0;
         int32_t cnt = 0;
-        while(curVal < maxVal) {
+        do {
             string newConfig{split[0]};
             for(auto i = 0; i < qs.size(); i++){
-                newConfig[qs[i]] = ((1 << i) & curVal) ? '#' : '.';
+                newConfig[qs[i]] = bsp[i] ? '#' : '.';
             }
             if(verifyConfig(newConfig, vals)) {
                 cnt++;
             }
-            curVal++;
-        }
+        }while(std::next_permutation(bsp.begin(), bsp.end()));
         return cnt;
+    }
+
+    std::string buildNewReport(const std::string& input) {
+        auto split = parseLineForWords(input);
+        string newString = split[0];
+        for(auto i = 1; i < 5;i++) {
+            newString += '?';
+            newString += split[0];
+        }
+        newString += ' ';
+        newString += split[1];
+        for(auto i = 1; i < 5;i++) {
+            newString += ',';
+            newString += split[1];
+        }
+        return newString;
     }
 }

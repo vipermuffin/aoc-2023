@@ -14,4 +14,5 @@ namespace AocDay12 {
 //Function Definitions
 bool verifyConfig(const std::string& lhs, const std::vector<int>& rhs);
 int32_t determineConfigs(const std::string&);
+std::string buildNewReport(const std::string&);
 }

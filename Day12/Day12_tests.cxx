@@ -11,7 +11,7 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <string>
-#include "AoCUtils.h"
+
 namespace AocDay12{
     extern std::string solvea();
     extern std::string solveb();
@@ -74,10 +74,28 @@ TEST(Y2023_Day12Example,Test2) {
     EXPECT_EQ(10,determineConfigs(input));
 }
 
+TEST(Y2023_Day12Example,Test2b) {
+    string input{"???.### 1,1,3"};
+    auto newInput = buildNewReport(input);
+    EXPECT_EQ(1,determineConfigs(newInput));
+//    input = ".??..??...?##. 1,1,3";
+//    newInput = buildNewReport(input);
+//    EXPECT_EQ(16384,determineConfigs(newInput));
+    input = "?#?#?#?#?#?#?#? 1,3,1,6";
+    newInput = buildNewReport(input);
+    EXPECT_EQ(1,determineConfigs(newInput));
+    input = ".????.#...#... 4,1,1";
+    newInput = buildNewReport(input);
+    EXPECT_EQ(16,determineConfigs(newInput));
+//    input = "????.######..#####. 1,6,5";
+//    newInput = buildNewReport(input);
+//    EXPECT_EQ(2500,determineConfigs(newInput));
+//    input = "?###???????? 3,2,1";
+//    newInput = buildNewReport(input);
+//    EXPECT_EQ(506250,determineConfigs(newInput));
+}
+
 TEST(Y2023_Day12Example,Test3) {
-    vector<bool> x{true,true,true,false,false,false};
-    printVector(x);
-    std::sort(x.begin(),x.end());
-    printVector(x);
-    EXPECT_FALSE(x.front());
+    string input{".# 1"};
+    EXPECT_EQ(".#?.#?.#?.#?.# 1,1,1,1,1", buildNewReport(input));
 }
