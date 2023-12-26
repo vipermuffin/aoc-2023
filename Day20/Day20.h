@@ -21,15 +21,16 @@ public:
     IModule() = default;
     virtual ~IModule(){}
     virtual std::vector<size_t> receivePulse(const size_t valPos, std::bitset<MOD_BITS>&){}
-    void addConnection(const size_t pos) {
+    void addOutputConnection(const size_t pos) {
         _connectedPos.push_back(pos);
-        std::cout << "-New Connection to module position " << _pos << " of " << pos << std::endl;
+//        std::cout << "-New Connection to module position " << _pos << " of " << pos << std::endl;
+    }
+    virtual void addInputConnection(const size_t pos) {}
+    virtual bool getVal(const std::bitset<MOD_BITS>& bits) const{
+        return bits[_pos];
     }
     bool getValPos() const {
         return _pos;
-    }
-    bool getVal(const std::bitset<MOD_BITS>& bits) const{
-        return bits[_pos];
     }
     
 protected:
@@ -49,10 +50,12 @@ class Conjunction : public IModule {
 public:
     Conjunction(const size_t initPos) {
         _pos = initPos;
-        std::cout << "New Conjunction with position " << _pos << std::endl;
+//        std::cout << "New Conjunction with position " << _pos << std::endl;
     }
     virtual ~Conjunction() {}
+    virtual void addInputConnection(const size_t pos);
     virtual std::vector<size_t> receivePulse(const size_t valPos, std::bitset<MOD_BITS>&);
+    virtual bool getVal(const std::bitset<MOD_BITS>& bits) const;
 private:
     std::unordered_map<size_t, bool>memory;
 };
@@ -61,14 +64,16 @@ class Broadcaster : public IModule {
 public:
     Broadcaster(const size_t initPos = 0) {
         _pos = initPos;
-        std::cout << "New Broadcaster with position " << _pos << std::endl;
+//        std::cout << "New Broadcaster with position " << _pos << std::endl;
     }
     virtual ~Broadcaster() {}
     virtual std::vector<size_t> receivePulse(const size_t valPos, std::bitset<MOD_BITS>&) {
         return _connectedPos;
     }
 };
+
+
 using ModuleCollection = std::vector<std::unique_ptr<IModule>>;
 std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<std::string>& input);
-void pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules);
+uint64_t pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules, int64_t numPresses = 1);
 }

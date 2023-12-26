@@ -37,8 +37,10 @@ namespace AocDay20 {
     static const std::string InputFileName = "Day20.txt";
     std::string solvea() {
         auto input = parseFileForLines(InputFileName);
-
-		return "---";
+        bitset<MOD_BITS> x{0};
+        auto modules = buildModuleConnections(input);
+        
+		return to_string(pressButton(x, modules,1000));
     }
 
     std::string solveb() {
@@ -49,28 +51,40 @@ namespace AocDay20 {
 
 FlipFlop::FlipFlop(const size_t initPos) {
     _pos = initPos;
-    cout << "New FlipFlop with position " << _pos << endl;
+//    cout << "New FlipFlop with position " << _pos << endl;
 }
 
 std::vector<size_t> FlipFlop::receivePulse(const size_t valPos, std::bitset<MOD_BITS> &bits) {
     std::vector<size_t> retVec{};
+//    cout << "FlipFlop " << _pos << " receiving pulse of " << (bits[valPos] ? "HIGH..." : "LOW...") ;
     if(!bits[valPos]) {
         bits.flip(_pos);
-        retVec = _connectedPos;
+//        cout << "sending " << _connectedPos.size() << (bits[_pos] ? " HIGH" : " LOW") << " pulses" << endl;
+        return _connectedPos;
     }
     return retVec;
 }
 
 std::vector<size_t> Conjunction::receivePulse(const size_t valPos, std::bitset<MOD_BITS> &bits) {
+//    cout << "Conjuction " << _pos << " receiving pulse of " << (bits[valPos] ? "HIGH..." : "LOW...");
     memory[valPos] = bits[valPos];
-    bool setVal = false;
+    bits[_pos] = this->getVal(bits);
+//    cout << "sending " << _connectedPos.size() << (bits[_pos] ? " HIGH" : " LOW") << " pulses" << endl;
+    return _connectedPos;
+}
+
+bool Conjunction::getVal(const std::bitset<MOD_BITS> &bits) const {
+    bool setVal = memory.size() == 0;
     for(const auto& kvp : memory) {
         if(!kvp.second) {
             setVal = true;
         }
     }
-    bits[_pos] = setVal;
-    return _connectedPos;
+    return setVal;
+}
+
+void Conjunction::addInputConnection(const size_t pos) {
+    memory[pos] = false;
 }
 
 std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<std::string>& input) {
@@ -110,28 +124,53 @@ std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<s
     
     for(const auto& kvp : pendingConnections) {
         for(const auto& output : kvp.second) {
-            retVec[moduleMapping.at(kvp.first)]->addConnection(moduleMapping.at(output));
+            if(moduleMapping.count(output) == 0) {
+                //some output module.  Treat as broadcast with a position
+                moduleMapping[output] = retVec.size();
+                retVec.push_back(unique_ptr<Broadcaster>(new Broadcaster(moduleMapping[output])));
+            }
+            retVec[moduleMapping.at(kvp.first)]->addOutputConnection(moduleMapping.at(output));
+            retVec[moduleMapping.at(output)]->addInputConnection(moduleMapping.at(kvp.first));
         }
     }
     
     return retVec;
 }
 
-void pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules) {
-    vector<std::pair<size_t,size_t>> updateMods{{0,0}};
+uint64_t pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules, int64_t numPresses) {
+    
     auto initVal = bits.to_ullong();
     bool firstPass = true;
-    do{
-        vector<std::pair<size_t,size_t>> nextMods{};
-        for(const auto pos : updateMods) {
-            firstPass = pos.first == 0;
-            auto result = modules[pos.second]->receivePulse(pos.first, bits);
-            for(const auto nextPos : result) {
-                nextMods.emplace_back(pos.second,nextPos);
+    uint64_t highPulseCnt{0};
+    uint64_t lowPulseCnt{0};
+    for(auto i = 1; i < modules.size(); i++) {
+        bits[i] = modules[i]->getVal(bits);
+    }
+    for(auto i = 0; i < numPresses; i++) {
+//        cout << "------------------Press " << i << "-------------------" << endl;
+        vector<std::pair<size_t,size_t>> updateMods{{0,0}};
+        do{
+            vector<std::pair<size_t,size_t>> nextMods{};
+            for(const auto pos : updateMods) {
+                firstPass = pos.first == 0;
+                
+                auto result = modules[pos.second]->receivePulse(pos.first, bits);
+                if(bits[pos.first]) {
+                    highPulseCnt++;
+                } else {
+                    lowPulseCnt++;
+                }
+                for(const auto nextPos : result) {
+                    nextMods.emplace_back(pos.second,nextPos);
+                }
             }
-        }
-        std::swap(nextMods,updateMods);
-        cout << bits.to_string() << endl;
-    } while(firstPass || bits.to_ullong() != initVal);
+            std::swap(nextMods,updateMods);
+//            cout << bits.to_string() << endl;
+        } while(updateMods.size() != 0);
+        
+    }
+    
+//    cout << "Sent " << highPulseCnt << " high pulses and " << lowPulseCnt << " low pulses" << endl;
+    return lowPulseCnt*highPulseCnt;
 }
 }

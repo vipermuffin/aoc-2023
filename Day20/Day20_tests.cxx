@@ -21,7 +21,7 @@ using namespace std;
 using namespace AocDay20;
 
 TEST(Y2023_SolveDay20, FinalSolutionPartA) {
-    EXPECT_EQ("---", solvea());
+    EXPECT_EQ("861743850", solvea());
 }
 
 TEST(Y2023_SolveDay20, FinalSolutionPartB) {
@@ -31,8 +31,8 @@ TEST(Y2023_SolveDay20, FinalSolutionPartB) {
 TEST(Y2023_Day20Example,Test1) {
     bitset<MOD_BITS> x{0};
     FlipFlop ff{1};
-    ff.addConnection(2);
-    ff.addConnection(3);
+    ff.addOutputConnection(2);
+    ff.addOutputConnection(3);
     auto result = ff.receivePulse(0, x);
     ASSERT_EQ(2,result.size());
     EXPECT_EQ(2,result[0]);
@@ -43,8 +43,8 @@ TEST(Y2023_Day20Example,Test1) {
 TEST(Y2023_Day20Example,Test2) {
     bitset<MOD_BITS> x{0};
     Conjunction cm{1};
-    cm.addConnection(2);
-    cm.addConnection(4);
+    cm.addOutputConnection(2);
+    cm.addOutputConnection(4);
     auto result = cm.receivePulse(0, x);
     EXPECT_TRUE(x[1]);
     ASSERT_EQ(2,result.size());
@@ -68,6 +68,20 @@ TEST(Y2023_Day20Example,Test3) {
     };
     bitset<MOD_BITS> x{0};
     auto modules = buildModuleConnections(input);
-    pressButton(x, modules);
-    ASSERT_EQ(5,modules.size());
+    
+    ASSERT_EQ(32,pressButton(x, modules, 1));
+}
+
+TEST(Y2023_Day20Example,Test4) {
+    vector<string> input {
+        "broadcaster -> a",
+        "%a -> inv, con",
+        "&inv -> b",
+        "%b -> con",
+        "&con -> output"
+    };
+    bitset<MOD_BITS> x{0};
+    auto modules = buildModuleConnections(input);
+    
+    ASSERT_EQ(11687500,pressButton(x, modules, 1000));
 }
