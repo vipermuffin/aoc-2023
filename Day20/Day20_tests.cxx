@@ -25,7 +25,7 @@ TEST(Y2023_SolveDay20, FinalSolutionPartA) {
 }
 
 TEST(Y2023_SolveDay20, FinalSolutionPartB) {
-    EXPECT_EQ("---", solveb());
+//    EXPECT_EQ("---", solveb());
 }
 
 TEST(Y2023_Day20Example,Test1) {
@@ -84,4 +84,20 @@ TEST(Y2023_Day20Example,Test4) {
     auto modules = buildModuleConnections(input);
     
     ASSERT_EQ(11687500,pressButton(x, modules, 1000));
+}
+
+TEST(Y2023_Day20Example,Test5) {
+    vector<string> input {
+        "broadcaster -> a",
+        "%a -> inv, con",
+        "&inv -> b",
+        "%b -> con",
+        "&con -> output"
+    };
+    bitset<MOD_BITS> x{0};
+    string keyNode{"output"};
+    size_t keyPos{0};
+    auto modules = buildModuleConnections(input,&keyNode,&keyPos);
+    
+    ASSERT_EQ(0,pressButton(x, modules, 1000,&keyPos));
 }

@@ -74,6 +74,6 @@ public:
 
 
 using ModuleCollection = std::vector<std::unique_ptr<IModule>>;
-std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<std::string>& input);
-uint64_t pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules, int64_t numPresses = 1);
+std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<std::string>& input, const std::string* keyNode = nullptr, size_t* keyValPos = nullptr);
+uint64_t pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules, int64_t numPresses = 1, size_t* keyValPos = nullptr);
 }

@@ -45,8 +45,12 @@ namespace AocDay20 {
 
     std::string solveb() {
         auto input = parseFileForLines(InputFileName);
-
-		return "---";
+        bitset<MOD_BITS> x{0};
+        string keyNode{"rx"};
+        size_t keyPos{0};
+        auto modules = buildModuleConnections(input, &keyNode, &keyPos);
+        
+        return to_string(pressButton(x, modules,1000000000000, &keyPos));
     }
 
 FlipFlop::FlipFlop(const size_t initPos) {
@@ -87,7 +91,7 @@ void Conjunction::addInputConnection(const size_t pos) {
     memory[pos] = false;
 }
 
-std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<std::string>& input) {
+std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<std::string>& input, const std::string* keyNode, size_t* keyValPos) {
     std::vector<std::unique_ptr<IModule>> retVec{};
     unordered_map<string, size_t> moduleMapping{{"broadcaster",0}};
     unordered_map<string, vector<string>> pendingConnections{};
@@ -112,7 +116,7 @@ std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<s
             //broadcaster 
             name = words[0];
         }
-        
+                
         for(auto i = 2; i < words.size(); i++) {
             auto commaPos = words[i].find(",");
             if(commaPos != string::npos) {
@@ -127,6 +131,12 @@ std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<s
             if(moduleMapping.count(output) == 0) {
                 //some output module.  Treat as broadcast with a position
                 moduleMapping[output] = retVec.size();
+                if(keyNode != nullptr && output == *keyNode) {
+                    cout << "Key Node found for position " << moduleMapping[output] << endl;
+                    if(keyValPos != nullptr) {
+                        *keyValPos = moduleMapping[output];
+                    }
+                }
                 retVec.push_back(unique_ptr<Broadcaster>(new Broadcaster(moduleMapping[output])));
             }
             retVec[moduleMapping.at(kvp.first)]->addOutputConnection(moduleMapping.at(output));
@@ -137,7 +147,7 @@ std::vector<std::unique_ptr<IModule>> buildModuleConnections(const std::vector<s
     return retVec;
 }
 
-uint64_t pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules, int64_t numPresses) {
+uint64_t pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules, int64_t numPresses, size_t* keyValPos) {
     
     auto initVal = bits.to_ullong();
     bool firstPass = true;
@@ -153,7 +163,11 @@ uint64_t pressButton(std::bitset<MOD_BITS>& bits, ModuleCollection& modules, int
             vector<std::pair<size_t,size_t>> nextMods{};
             for(const auto pos : updateMods) {
                 firstPass = pos.first == 0;
-                
+                if(keyValPos != nullptr && *keyValPos == pos.second) {
+                    if(bits[pos.first] == false) {
+                        return i;
+                    }
+                }
                 auto result = modules[pos.second]->receivePulse(pos.first, bits);
                 if(bits[pos.first]) {
                     highPulseCnt++;
