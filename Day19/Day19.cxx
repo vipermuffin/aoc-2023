@@ -11,7 +11,7 @@
 #include "AoCUtils.h"
 //Common Libraries
 #include <algorithm> //std::sort, find, for_each, max_element, etc
-//#include <array>
+#include <array>
 #include <climits>   //INT_MIN, INT_MAX, etc.
 //#include <chrono>
 //#include <iostream>
@@ -20,12 +20,12 @@
 //#include <iomanip> //setfill setw hex
 //#include <map>
 //#include <math.h> //sqrt
-//#include <numeric> //std::accumulate
+#include <numeric> //std::accumulate
 //#include <queue>
 //#include <regex>
 //#include <set>
 //#include <sstream>
-//#include <thread>
+#include <thread>
 //#include <tuple>
 //#include <unordered_map>
 //#include <unordered_set>

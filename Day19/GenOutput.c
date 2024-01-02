@@ -1,5 +1,8 @@
 #include "GenOutput.h"
 #include <cstdint>   //INT_MIN, INT_MAX, etc.
+//#include <thread>
+//#include <vector>
+//#include <array>
 
 //Function Prototypes
 uint64_t runWorkflows(void);
@@ -211,32 +214,36 @@ uint64_t runWorkflows() {
 
    return acc;
 }
-uint64_t runWorkflows2() {
-   uint64_t acc = 0;
-    bool initX = in(1,1,1,1);
-   for(auto x = 1; x <= 4000; x++) {
-       cout << x << endl;
-       bool initM = in(x,1,1,1);
-      for(auto m = 1; m <= 4000; m++) {
-          bool initA = in(x,m,1,1);
-         for(auto a = 1; a <= 4000; a++) {
-             bool initS = in(x,m,a,1);
-            for(auto s = 1; s <= 4000; s++) {
-                auto result = in(x,m,a,s) ? 1 : 0;
-                if(initS) {
-                    if(result) {
-                        acc++;
+
+void runWorkflowThread(uint_fast16_t start, uint_fast16_t end, uint64_t& acc) {
+    for(auto x = start; x <= end; x++) {
+        cout << x << endl;
+        for(auto m = 1; m <= 4000; m++) {
+            for(auto a = 1; a <= 4000; a++) {
+                for(auto s = 1; s <= 4000; s++) {
+                    if(in(x,m,a,s)) {
+                     acc++;
                     }
-                } else if(result) {
-                    acc += 4000-s;
-                    s=4001;
                 }
             }
-         }
-      }
-   }
+        }
+    }
+}
 
-   return acc;
+uint64_t runWorkflows2() {
+    uint64_t acc = 0;
+    std::vector<std::thread> tV{};
+    std::array<uint64_t,8> counts{0,0,0,0,0,0,0,0};
+    tV.reserve(8);
+    for(auto i = 0; i<8; i++) {
+        auto offset = i*500;
+        tV.emplace_back(runWorkflowThread,1+offset,500+offset,std::ref(counts[i]));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+    for_each(tV.begin(),tV.end(),[](std::thread& t){t.join();});
+    acc = std::accumulate(counts.begin(),counts.end(),static_cast<uint64_t>(0));
+
+    return acc;
 }
 
 inline bool vr(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1492,7 +1499,7 @@ inline bool hg(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool qtg(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>1184 ? false : (s<2253 ? false : (m>704 ? false : false)));
+   return false;
 }
 
 inline bool psf(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1828,7 +1835,7 @@ inline bool ghg(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool tbx(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (x<3172 ? true : (a<196 ? false : false));
+   return (x<3172 ? true : false);
 }
 
 inline bool zdk(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1840,7 +1847,7 @@ inline bool kr(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool pfj(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s>3032 ? false : false);
+   return false;
 }
 
 inline bool cf(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1848,7 +1855,7 @@ inline bool cf(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool bbc(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (x>1594 ? false : (m<3225 ? gdn(x,m,a,s) : (a>1201 ? true : true)));
+   return (x>1594 ? false : (m<3225 ? gdn(x,m,a,s) : true));
 }
 
 inline bool lsb(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1864,7 +1871,7 @@ inline bool sjv(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool mh(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (a>2662 ? true : true);
+   return true;
 }
 
 inline bool kgj(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1872,7 +1879,7 @@ inline bool kgj(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool sxh(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>1060 ? false : (s>2864 ? false : false));
+   return (false);
 }
 
 inline bool jq(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1880,7 +1887,7 @@ inline bool jq(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool rpb(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (a>1574 ? true : true);
+   return true;
 }
 
 inline bool grp(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1892,15 +1899,15 @@ inline bool dxh(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool jtz(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>3480 ? jz(x,m,a,s) : (s<2415 ? false : false));
+   return (m>3480 ? jz(x,m,a,s) : false);
 }
 
 inline bool hs(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>3505 ? true : (s>1154 ? false : (a<1005 ? true : true)));
+   return (m>3505 ? true : (s>1154 ? false : true));
 }
 
 inline bool cmf(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s<1821 ? false : (a<458 ? false : (s<1920 ? false : false)));
+   return false;
 }
 
 inline bool zv(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1920,7 +1927,7 @@ inline bool xsc(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool rht(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (x>607 ? false : (m>2014 ? false : (a>503 ? true : true)));
+   return (x>607 ? false : (m>2014 ? false : true));
 }
 
 inline bool lz(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1948,7 +1955,7 @@ inline bool mxc(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool px(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (a>644 ? true : (s<2728 ? false : (x>3287 ? false : false)));
+   return (a>644 ? true : false);
 }
 
 inline bool hbj(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1972,7 +1979,7 @@ inline bool ksm(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool rnp(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (x<1831 ? true : true);
+   return true;
 }
 
 inline bool vdt(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1984,7 +1991,7 @@ inline bool xnq(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool qcs(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s>3317 ? false : (a<1598 ? true : (s<2533 ? true : true)));
+   return (s>3317 ? false : true);
 }
 
 inline bool vdf(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -1992,7 +1999,7 @@ inline bool vdf(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool xvp(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (a<2548 ? false : (x>1951 ? true : (s>1071 ? true : true)));
+   return (a<2548 ? false : true);
 }
 
 inline bool xjp(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2004,7 +2011,7 @@ inline bool nm(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool rkn(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s<3726 ? true : true);
+   return true;
 }
 
 inline bool tgd(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2036,7 +2043,7 @@ inline bool hmm(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool hr(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>2968 ? false : false);
+   return false;
 }
 
 inline bool fvs(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2044,11 +2051,11 @@ inline bool fvs(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool mx(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m<1237 ? false : (m<1330 ? true : (m<1387 ? true : true)));
+   return (m<1237 ? false : true);
 }
 
 inline bool dtj(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m<3403 ? false : (m<3689 ? false : (a<346 ? true : true)));
+   return (m<3403 ? false : (m<3689 ? false : true));
 }
 
 inline bool cqs(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2068,7 +2075,7 @@ inline bool mlc(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool lmr(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (a<556 ? true : (s>441 ? false : (a<924 ? false : false)));
+   return (a<556 ? true : false);
 }
 
 inline bool xf(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2080,7 +2087,7 @@ inline bool vbq(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool zmg(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (x<2959 ? false : (m<1833 ? true : true));
+   return (x<2959 ? false : true);
 }
 
 inline bool cx(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2088,15 +2095,15 @@ inline bool cx(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool vfz(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s<720 ? false : (m>3667 ? false : (m<3658 ? true : true)));
+   return (s<720 ? false : (m>3667 ? false : true));
 }
 
 inline bool gz(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s<1382 ? true : true);
+   return true;
 }
 
 inline bool qlz(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m<2261 ? true : (m>2278 ? false : (x<1617 ? false : false)));
+   return (m<2261 ? true : false);
 }
 
 inline bool lh(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2116,7 +2123,7 @@ inline bool lvb(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool hj(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>1236 ? pk(x,m,a,s) : (m>1173 ? true : true));
+   return (m>1236 ? pk(x,m,a,s) : true);
 }
 
 inline bool nd(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2124,7 +2131,7 @@ inline bool nd(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool qrq(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s>2394 ? false : false);
+   return false;
 }
 
 inline bool ltm(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2136,7 +2143,7 @@ inline bool pcv(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool vx(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>1249 ? false : (m<1122 ? true : true));
+   return (m>1249 ? false : true);
 }
 
 inline bool kk(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2144,7 +2151,7 @@ inline bool kk(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool hrm(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (x<3482 ? false : false);
+   return false;
 }
 
 inline bool rb(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2152,11 +2159,11 @@ inline bool rb(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool ct(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>3575 ? false : (s<923 ? true : (m>3498 ? false : false)));
+   return (m>3575 ? false : (s<923 ? true : false));
 }
 
 inline bool bbl(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m<2954 ? false : (x>1234 ? true : (x<1131 ? false : false)));
+   return (m<2954 ? false : (x>1234 ? true : false));
 }
 
 inline bool hzr(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2176,7 +2183,7 @@ inline bool bld(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool mzr(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s>3296 ? true : true);
+   return true;
 }
 
 inline bool pq(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2188,7 +2195,7 @@ inline bool vc(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool fl(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (a<3463 ? false : false);
+   return false;
 }
 
 inline bool pt(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2200,7 +2207,7 @@ inline bool xs(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool rp(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s>3756 ? false : false);
+   return false;
 }
 
 inline bool rs(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2224,7 +2231,7 @@ inline bool np(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool xjt(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (a<2267 ? true : (a>2500 ? false : false));
+   return (a<2267 ? true : false);
 }
 
 inline bool bz(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2248,7 +2255,7 @@ inline bool kjx(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool rqj(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>1961 ? true : (a>1896 ? false : false));
+   return (m>1961 ? true : false);
 }
 
 inline bool hq(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2256,7 +2263,7 @@ inline bool hq(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool btp(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>271 ? false : (m<99 ? false : false));
+   return false;
 }
 
 inline bool bkc(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2264,15 +2271,15 @@ inline bool bkc(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool tlf(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (x>1415 ? true : (s<1196 ? bbl(x,m,a,s) : (m<2985 ? false : false)));
+   return (x>1415 ? true : (s<1196 ? bbl(x,m,a,s) : false));
 }
 
 inline bool rmd(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (x<2173 ? false : (m>3498 ? true : true));
+   return (x<2173 ? false : true);
 }
 
 inline bool ndl(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m<1968 ? false : (a>1791 ? false : false));
+   return false;
 }
 
 inline bool ml(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2284,7 +2291,7 @@ inline bool tqs(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool gvf(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (x>914 ? false : (a<781 ? true : true));
+   return (x>914 ? false : true);
 }
 
 inline bool cj(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2300,7 +2307,7 @@ inline bool hgf(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool vhq(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s<2884 ? true : (a<584 ? false : (x<224 ? true : true)));
+   return (s<2884 ? true : (a<584 ? false : true));
 }
 
 inline bool dbd(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2312,7 +2319,7 @@ inline bool fpr(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool mfx(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (a>500 ? true : true);
+   return true;
 }
 
 inline bool kq(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2320,7 +2327,7 @@ inline bool kq(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool db(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (x<945 ? false : false);
+   return false;
 }
 
 inline bool lp(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2340,7 +2347,7 @@ inline bool tq(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool nb(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s>529 ? false : (x<1923 ? false : (s>292 ? true : true)));
+   return (s>529 ? false : (x<1923 ? false : true));
 }
 
 inline bool ztp(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2368,7 +2375,7 @@ inline bool cd(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool rrx(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s<3496 ? false : (a<348 ? false : false));
+   return false;
 }
 
 inline bool grd(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2380,7 +2387,7 @@ inline bool ntj(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool dn(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (a<2690 ? true : true);
+   return true;
 }
 
 inline bool gq(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2400,11 +2407,11 @@ inline bool sj(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool nvs(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s<1811 ? false : false);
+   return false;
 }
 
 inline bool pvs(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s<3335 ? false : (a>628 ? false : false));
+   return false;
 }
 
 inline bool ntv(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2416,7 +2423,7 @@ inline bool rph(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool ltt(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m>3838 ? true : (m>3769 ? true : true));
+   return true;
 }
 
 inline bool pvh(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2444,7 +2451,7 @@ inline bool ktm(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool dd(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m<3002 ? false : (a<1464 ? true : true));
+   return (m<3002 ? false : true);
 }
 
 inline bool nfh(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2472,7 +2479,7 @@ inline bool jcc(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool ftg(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s<3673 ? true : (x>3286 ? false : (m<1558 ? true : true)));
+   return (s<3673 ? true : (x>3286 ? false : true));
 }
 
 inline bool dq(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2500,7 +2507,7 @@ inline bool sc(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool cks(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (m<3797 ? false : (a>741 ? true : true));
+   return (m<3797 ? false : true);
 }
 
 inline bool cmc(int32_t x, int32_t m, int32_t a, int32_t s) {
@@ -2508,7 +2515,7 @@ inline bool cmc(int32_t x, int32_t m, int32_t a, int32_t s) {
 }
 
 inline bool xz(int32_t x, int32_t m, int32_t a, int32_t s) {
-   return (s>683 ? false : (a>2623 ? true : true));
+   return (s>683 ? false : true);
 }
 
 inline bool mt(int32_t x, int32_t m, int32_t a, int32_t s) {
